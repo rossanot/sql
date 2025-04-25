@@ -65,7 +65,17 @@ Make `customer_id` a principal key in the `customer_address` table, this way onl
 RELATIONSHIP: 1:1 (customer : address)
 ```
 
-***
+**Diagrams**
+<figure>
+  <img src="./images/bookstore-type1.png" alt="">
+  <figcaption>Figure 1. Type 1</figcaption>
+</figure>
+
+<figure>
+  <img src="./images/bookstore-type2.png" alt="">
+  <figcaption>Figure 2. Type 2</figcaption>
+</figure>
+
 
 ## Section 2:
 You can start this section following *session 4*.
