@@ -43,14 +43,18 @@ SELECT *,
 	SELECT DISTINCT market_date, customer_id
 	FROM customer_purchases
 	);
-	
 
-SELECT market_date, customer_id,
+--
+
+SELECT
+	customer_id,
+	market_date,
 	dense_rank() OVER(
 		PARTITION BY customer_id
-		ORDER BY market_date
-	) visit_number
+		ORDER BY market_date ASC
+	) AS visit_number
 FROM customer_purchases;
+
 -- 
 /* 2. Reverse the numbering of the query from a part so each customer’s most recent visit is labeled 1, 
 then write another query that uses this one as a subquery (or temp table) and filters the results to 
@@ -260,6 +264,5 @@ SELECT product_id, current_quantity
 WHERE ranking = 1 AND market_date = (SELECT MAX(market_date) FROM vendor_inventory) -- maybe need to get rid of second part
 ) AS cq
 WHERE product_units.product_id = cq.product_id
-
 ;
 
