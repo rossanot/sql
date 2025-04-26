@@ -248,21 +248,88 @@ ALTER TABLE product_units
 ADD current_quantity INT;
 
 
+ALTER TABLE product_units
+ADD current_quantity INT
+;
+
+-- NOTE: I wasn't sure what "last" quantity per product meant,
+-- i.e., the most recent date across all the dates registered
+-- in the vendor_inventory or the most recent date for
+-- an specify product. Here, I am proposing a solution for each case
+
+-- OPTION A (last date mong all possible dates)
 UPDATE product_units
-SET current_quantity = cq.current_quantity
+SET current_quantity = cq.new_current_quantity
 FROM
 (
-SELECT product_id, current_quantity
-		FROM (
-			SELECT
-				product_id,
-				market_date,
-				quantity as current_quantity,
-				ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS ranking
-			FROM vendor_inventory
-		)
-WHERE ranking = 1 AND market_date = (SELECT MAX(market_date) FROM vendor_inventory) -- maybe need to get rid of second part
+
+SELECT 
+    product_id,
+    coalesce(current_quantity, 0) new_current_quantity
+
+FROM
+(
+
+	-- SEL 1
+	SELECT pu.product_id, vi.current_quantity
+	FROM product_units AS pu
+
+	LEFT JOIN (
+	-- SEL 2
+		SELECT product_id, current_quantity
+			FROM (
+					SELECT
+						product_id,
+						market_date,
+						quantity as current_quantity,
+						ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS ranking
+					FROM vendor_inventory
+					)
+		WHERE ranking = 1
+		) AS vi
+	ON pu.product_id = vi.product_id
+	)
+
 ) AS cq
 WHERE product_units.product_id = cq.product_id
 ;
+
+
+-- OPTION B (Last date wrt each product_id)
+UPDATE product_units
+SET current_quantity = cq.new_current_quantity
+FROM
+(
+
+SELECT 
+    product_id,
+    coalesce(current_quantity, 0) new_current_quantity
+
+FROM
+(
+
+	-- SEL 1
+	SELECT pu.product_id, vi.current_quantity
+	FROM product_units AS pu
+
+	LEFT JOIN (
+	-- SEL 2
+		SELECT product_id, current_quantity
+			FROM (
+					SELECT
+						product_id,
+						market_date,
+						quantity as current_quantity,
+						ROW_NUMBER() OVER (PARTITION BY product_id ORDER BY market_date DESC) AS ranking
+					FROM vendor_inventory
+					)
+		WHERE ranking = 1 AND market_date = (SELECT MAX(market_date) FROM vendor_inventory) -- maybe need to get rid of second part
+		) AS vi
+	ON pu.product_id = vi.product_id
+	)
+
+) AS cq
+WHERE product_units.product_id = cq.product_id
+;
+
 
