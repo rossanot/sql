@@ -252,7 +252,7 @@ ADD current_quantity INT;
 -- in the vendor_inventory or the most recent date for
 -- an specify product. Here, I am proposing a solution for each case
 
--- OPTION A (last date mong all possible dates)
+-- OPTION A (Last date wrt each product_id)
 UPDATE product_units
 SET current_quantity = cq.new_current_quantity
 FROM
@@ -290,7 +290,7 @@ WHERE product_units.product_id = cq.product_id
 ;
 
 
--- OPTION B (Last date wrt each product_id)
+-- OPTION B (last date among all possible dates)
 UPDATE product_units
 SET current_quantity = cq.new_current_quantity
 FROM
