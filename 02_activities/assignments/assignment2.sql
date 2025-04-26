@@ -247,11 +247,6 @@ When you have all of these components, you can run the update statement. */
 ALTER TABLE product_units
 ADD current_quantity INT;
 
-
-ALTER TABLE product_units
-ADD current_quantity INT
-;
-
 -- NOTE: I wasn't sure what "last" quantity per product meant,
 -- i.e., the most recent date across all the dates registered
 -- in the vendor_inventory or the most recent date for
